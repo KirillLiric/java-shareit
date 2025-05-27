@@ -22,19 +22,10 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserDto userDto) {
-        try {
-            User user = UserMapper.toEntity(userDto);
-            User createdUser = userService.create(user);
-            return ResponseEntity.ok(UserMapper.toDto(createdUser));
-        } catch (ValidationException e) {
-            Map<String, String> errorResponse = Map.of(
-                    "error", "Conflict",
-                    "message", e.getMessage(),
-                    "status", "409"
-            );
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        }
+    public UserDto createUser(@RequestBody @Valid UserDto userDto) {
+        User user = UserMapper.toEntity(userDto);
+        User newUser = userService.create(user);
+        return UserMapper.toDto(newUser);
     }
 
     @PatchMapping("/{userId}")

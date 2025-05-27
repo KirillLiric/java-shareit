@@ -21,10 +21,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) {
-        if (emailExists(user.getEmail())) {
+        validateUser(user);
+        checkEmailUniqueness(user.getEmail());
+        return userRepository.save(user);
+    }
+
+    private void validateUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new ValidationException("Имя пользователя не может быть пустым");
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new ValidationException("Email не может быть пустым");
+        }
+        if (!user.getEmail().contains("@")) {
+            throw new ValidationException("Некорректный формат email");
+        }
+    }
+
+    private void checkEmailUniqueness(String email) {
+        if (userRepository.existsByEmail(email)) {
             throw new ValidationException("Email уже используется");
         }
-        return userRepository.save(user);
     }
 
     @Override
