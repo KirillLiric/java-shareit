@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<AppError> catchUnavailableItemException(UnavailableItemException e) {
         log.error(e.getMessage(), e);
-        return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), e.getMessage()),
-                HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler
