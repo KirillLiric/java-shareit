@@ -33,8 +33,8 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemInfoService.getById(bookingDto.getItemId());
 
         if (!item.getAvailable()) {
-            throw new UnavailableItemException("Вещь недоступна для бронирования");
-            //throw new RuntimeException("Вещь недоступна для бронирования");
+            //throw new UnavailableItemException("Вещь недоступна для бронирования");
+            throw new RuntimeException("Вещь недоступна для бронирования");
         }
 
         if (item.getOwner().getId().equals(bookerId)) {
