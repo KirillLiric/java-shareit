@@ -27,13 +27,14 @@ public class BookingServiceImpl implements BookingService {
     private final ItemInfoService itemInfoService;
 
     @Override
+    @Transactional
     public BookingResponseDto createBooking(BookingRequestDto bookingDto, Long bookerId) {
         validateBookingDates(bookingDto);
         Item item = itemInfoService.getById(bookingDto.getItemId());
 
         if (!item.getAvailable()) {
-            //throw new UnavailableItemException("Вещь недоступна для бронирования");
-            throw new RuntimeException("Вещь недоступна для бронирования");
+            throw new UnavailableItemException("Вещь недоступна для бронирования");
+            //throw new RuntimeException("Вещь недоступна для бронирования");
         }
 
         if (item.getOwner().getId().equals(bookerId)) {
