@@ -60,31 +60,12 @@ public class ItemRequestController {
                 .collect(Collectors.toList());
     }
 
-
-
     @GetMapping("/all")
     public List<ItemRequestWithItemsDto> getAllExceptRequester(
             @RequestHeader("X-Sharer-User-Id") Long requesterId,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
-
-        List<ItemRequest> requests = requestService.getAllExceptRequester(requesterId, from, size);
-
-        List<Long> requestIds = requests.stream()
-                .map(ItemRequest::getId)
-                .collect(Collectors.toList());
-
-        List<ItemDto> allItems = itemService.findAllByRequestIdIn(requestIds);
-
-        Map<Long, List<ItemDto>> itemsByRequestId = allItems.stream()
-                .collect(Collectors.groupingBy(ItemDto::getRequestId));
-
-        return requests.stream()
-                .map(request -> ItemRequestMapper.toWithItemsDto(
-                        request,
-                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList())
-                ))
-                .collect(Collectors.toList());
+        return requestService.getAllExceptRequesterWithItems(requesterId, from, size);
     }
 
     @DeleteMapping("/{requestId}")

@@ -113,6 +113,16 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ItemDto> findAllByRequestIdIn(List<Long> requestIds) {
+        if (requestIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return itemRepository.findAllByRequestIdIn(requestIds).stream()
+                .map(ItemMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     private void updateItemFields(Item existingItem, Item newItem) {
         if (newItem.getName() != null) {
             existingItem.setName(newItem.getName());

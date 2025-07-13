@@ -14,6 +14,8 @@ public interface ItemRequestService {
 
     List<ItemRequestWithItemsDto> getAllByRequesterWithItems(Long requesterId);
 
+    List<ItemRequestWithItemsDto> getAllExceptRequesterWithItems(Long requesterId, int from, int size);
+
     List<ItemRequest> getAllExceptRequester(Long requesterId, int from, int size);
 
     void delete(Long requestId, Long userId);

@@ -39,14 +39,24 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestWithItemsDto> getAllByRequesterWithItems(Long requesterId) {
-
         List<ItemRequest> requests = requestRepository.findByRequesterIdOrderByCreatedDesc(requesterId);
+        return getItemRequestWithItemsDtos(requests);
+    }
+
+    @Override
+    public List<ItemRequestWithItemsDto> getAllExceptRequesterWithItems(Long requesterId, int from, int size) {
+        PageRequest page = PageRequest.of(from / size, size);
+        List<ItemRequest> requests = requestRepository.findByRequesterIdNotOrderByCreatedDesc(requesterId, page);
+
+        if (requests.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<Long> requestIds = requests.stream()
                 .map(ItemRequest::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, List<ItemDto>> itemsByRequestId = itemService.findAllByRequestIds(requestIds)
+        Map<Long, List<ItemDto>> itemsByRequestId = itemService.findAllByRequestIdIn(requestIds)
                 .stream()
                 .collect(Collectors.groupingBy(ItemDto::getRequestId));
 
@@ -57,6 +67,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    private List<ItemRequestWithItemsDto> getItemRequestWithItemsDtos(List<ItemRequest> requests) {
+        if (requests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<ItemDto>> itemsByRequestId = itemService.findAllByRequestIdIn(requestIds)
+                .stream()
+                .collect(Collectors.groupingBy(ItemDto::getRequestId));
+
+        return requests.stream()
+                .map(request -> ItemRequestMapper.toWithItemsDto(
+                        request,
+                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList())
+                ))
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public ItemRequest getById(Long requestId, Long userId) {
