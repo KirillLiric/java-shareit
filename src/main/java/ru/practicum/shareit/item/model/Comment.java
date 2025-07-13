@@ -1,17 +1,21 @@
 package ru.practicum.shareit.item.model;
 
+import jakarta.persistence.*;
 import lombok.*;
+
 import ru.practicum.shareit.user.model.User;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "comments")
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString(exclude = {"item", "author"})
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +34,17 @@ public class Comment {
 
     @Column(nullable = false)
     private LocalDateTime created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

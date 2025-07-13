@@ -1,19 +1,21 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import ru.practicum.shareit.user.model.User;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "items")
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@ToString(exclude = "owner")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +36,17 @@ public class Item {
 
     @Column(name = "request_id")
     private Long requestId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(id, item.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

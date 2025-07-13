@@ -1,10 +1,13 @@
 package ru.practicum.shareit.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
@@ -51,6 +54,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new AppError(HttpStatus.FORBIDDEN.value(), ex.getMessage()),
                 HttpStatus.FORBIDDEN
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<AppError> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.joining(", "));
+
+        return new ResponseEntity<>(
+                new AppError(HttpStatus.BAD_REQUEST.value(), message),
+                HttpStatus.BAD_REQUEST
         );
     }
 

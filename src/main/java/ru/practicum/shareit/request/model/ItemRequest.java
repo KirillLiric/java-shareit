@@ -1,20 +1,20 @@
 package ru.practicum.shareit.request.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "requests")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(exclude = "requester")
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,4 +29,17 @@ public class ItemRequest {
 
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemRequest that = (ItemRequest) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

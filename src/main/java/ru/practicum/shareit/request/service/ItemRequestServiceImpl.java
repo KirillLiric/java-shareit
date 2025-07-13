@@ -6,12 +6,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.dto.ItemRequestWithItemsDto;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +26,7 @@ import java.util.List;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository requestRepository;
     private final UserService userService;
+    private final ItemService itemService;
 
     @Override
     @Transactional
@@ -27,6 +35,27 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         request.setRequester(userService.getById(requesterId));
         request.setCreated(LocalDateTime.now());
         return requestRepository.save(request);
+    }
+
+    @Override
+    public List<ItemRequestWithItemsDto> getAllByRequesterWithItems(Long requesterId) {
+
+        List<ItemRequest> requests = requestRepository.findByRequesterIdOrderByCreatedDesc(requesterId);
+
+        List<Long> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<ItemDto>> itemsByRequestId = itemService.findAllByRequestIds(requestIds)
+                .stream()
+                .collect(Collectors.groupingBy(ItemDto::getRequestId));
+
+        return requests.stream()
+                .map(request -> ItemRequestMapper.toWithItemsDto(
+                        request,
+                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList())
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override

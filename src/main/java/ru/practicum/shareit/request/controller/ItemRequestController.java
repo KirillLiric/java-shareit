@@ -10,7 +10,9 @@ import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,24 +43,47 @@ public class ItemRequestController {
     @GetMapping
     public List<ItemRequestWithItemsDto> getAllByRequester(
             @RequestHeader("X-Sharer-User-Id") Long requesterId) {
-        return requestService.getAllByRequester(requesterId).stream()
-                .map(request -> {
-                    List<ItemDto> items = itemService.findAllByRequestId(request.getId());
-                    return ItemRequestMapper.toWithItemsDto(request, items);
-                })
+        List<ItemRequest> requests = requestService.getAllByRequester(requesterId);
+        List<Long> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        List<ItemDto> allItems = itemService.findAllByRequestIdIn(requestIds);
+        Map<Long, List<ItemDto>> itemsByRequestId = allItems.stream()
+                .collect(Collectors.groupingBy(ItemDto::getRequestId));
+
+        return requests.stream()
+                .map(request -> ItemRequestMapper.toWithItemsDto(
+                        request,
+                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList()))
+                )
                 .collect(Collectors.toList());
     }
+
+
 
     @GetMapping("/all")
     public List<ItemRequestWithItemsDto> getAllExceptRequester(
             @RequestHeader("X-Sharer-User-Id") Long requesterId,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
-        return requestService.getAllExceptRequester(requesterId, from, size).stream()
-                .map(request -> {
-                    List<ItemDto> items = itemService.findAllByRequestId(request.getId());
-                    return ItemRequestMapper.toWithItemsDto(request, items);
-                })
+
+        List<ItemRequest> requests = requestService.getAllExceptRequester(requesterId, from, size);
+
+        List<Long> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        List<ItemDto> allItems = itemService.findAllByRequestIdIn(requestIds);
+
+        Map<Long, List<ItemDto>> itemsByRequestId = allItems.stream()
+                .collect(Collectors.groupingBy(ItemDto::getRequestId));
+
+        return requests.stream()
+                .map(request -> ItemRequestMapper.toWithItemsDto(
+                        request,
+                        itemsByRequestId.getOrDefault(request.getId(), Collections.emptyList())
+                ))
                 .collect(Collectors.toList());
     }
 
