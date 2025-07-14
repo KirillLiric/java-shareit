@@ -16,6 +16,7 @@ import java.util.List;
 @Validated
 public class BookingController {
     private final BookingService bookingService;
+
     @PostMapping
     public BookingResponseDto createBooking(
             @RequestBody BookingRequestDto bookingDto,
