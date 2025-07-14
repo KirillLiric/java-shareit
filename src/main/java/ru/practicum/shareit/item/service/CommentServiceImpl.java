@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingInfoService;
 import ru.practicum.shareit.exception.CommentException;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,11 @@ public class CommentServiceImpl implements CommentService {
         validateComment(commentDto);
         User author = userService.getById(userId);
         Item item = itemInfoService.getById(itemId);
+
+        Optional<Booking> lastBooking = bookingInfoService.findLastUserBookingForItem(userId, itemId);
+        if (lastBooking.isEmpty() || lastBooking.get().getEnd().isAfter(LocalDateTime.now())) {
+            throw new CommentException("Пользователь не бронировал эту вещь или бронирование еще не завершено");
+        }
 
         validateUserBookedItem(userId, itemId);
 

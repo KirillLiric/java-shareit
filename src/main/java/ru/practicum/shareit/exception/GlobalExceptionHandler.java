@@ -57,6 +57,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<AppError> handleCommentException(CommentException ex) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(
+                new AppError(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<AppError> handleConstraintViolation(ConstraintViolationException ex) {
         String message = ex.getConstraintViolations().stream()
@@ -65,14 +74,6 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(
                 new AppError(HttpStatus.BAD_REQUEST.value(), message),
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
-    @ExceptionHandler(CommentException.class)
-    public ResponseEntity<AppError> handlCommentException(CommentException ex) {
-        return new ResponseEntity<>(
-                new AppError(HttpStatus.BAD_REQUEST.value(), ex.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
